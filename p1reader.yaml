@@ -48,10 +48,11 @@ ota:
 uart:
   id: uart_bus
   tx_pin: TX
-  rx_pin: RX
+  rx_pin:
+    number: RX
+    inverted: true    # Most P1 meters require inverted signal
   baud_rate: 115200
   rx_buffer_size: 3072    # UART Buffer size controls polling frequency
-  invert: true          # Most P1 meters require inverted signal
 
 p1reader:
   - id: p1reader_esp
