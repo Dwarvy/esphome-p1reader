@@ -61,9 +61,9 @@ namespace esphome
             set_update_interval(_pollingIntervalMs);
 
             // Start with a clean buffer
-            memset(_buffer, 0, BUF_SIZE);
+            memset(_buffer, 0, P1_BUF_SIZE);
             _bufferLen = 0;
-            ESP_LOGI("setup", "Internal buffer size is %d", BUF_SIZE);
+            ESP_LOGI("setup", "Internal buffer size is %d", P1_BUF_SIZE);
 
             _parsedMessage.initNewTelegram();
         }
@@ -257,8 +257,8 @@ namespace esphome
             while (available())
             {
                 // Use the buffer to read a line
-                memset(_buffer, 0, BUF_SIZE);
-                int len = readBytesUntilAndIncluding('\n', _buffer, BUF_SIZE-1);
+                memset(_buffer, 0, P1_BUF_SIZE);
+                int len = readBytesUntilAndIncluding('\n', _buffer, P1_BUF_SIZE-1);
                 
                 if (len > 0) {
                     // Ensure null termination
@@ -481,7 +481,7 @@ namespace esphome
                         }
 
                         // clean buffer for next packet
-                        memset(_buffer, 0, BUF_SIZE);
+                        memset(_buffer, 0, P1_BUF_SIZE);
                         _bufferLen = 0;
 
                         if (data == 0x7e)
@@ -514,7 +514,7 @@ namespace esphome
                             ESP_LOGD("hdlc", "Found end of frame...");
                         }
 
-                        if (_bufferLen >= BUF_SIZE)
+                        if (_bufferLen >= P1_BUF_SIZE)
                         {
                             _parseHDLCState = OUTSIDE_FRAME;
                             ESP_LOGE("hdlc", "Failed to read frame, buffer overflow, bailing out...");

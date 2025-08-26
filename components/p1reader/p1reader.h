@@ -49,7 +49,7 @@ namespace esphome
             int _pollingIntervalMs;
 
             ParsedMessage _parsedMessage = ParsedMessage();
-            char _buffer[BUF_SIZE];
+            char _buffer[P1_BUF_SIZE];
             uint16_t _bufferLen;
             int _uSecondsPerByte;
 

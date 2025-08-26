@@ -10,7 +10,8 @@
 #include "esphome/core/log.h"
 #include <cmath>
 
-#define BUF_SIZE 256
+// Use a different name to avoid conflicting with ESPHome's BUF_SIZE
+#define P1_BUF_SIZE 256
 
 namespace esphome
 {
@@ -20,6 +21,7 @@ namespace esphome
         public:
             bool telegramComplete;
             bool crcOk;
+            int sensorsToSend;
 
             // Standard power readings
             double cumulativeActiveImport;
@@ -71,7 +73,7 @@ namespace esphome
             double gasConsumption;
             double waterConsumption;
 
-            uint16_t crc16;
+            uint16_t crc;
 
             void parseRow(const char* obisCode, const char* value)
             {
@@ -263,23 +265,24 @@ namespace esphome
             {
                 telegramComplete = false;
                 crcOk = false;
-                crc16 = 0;
+                crc = 0;
+                sensorsToSend = 32; // Initialize sensor count to 32 to include all sensors
             }
             
             // Update CRC16 with a new byte
             void updateCrc16(char b)
             {
-                crc16 = (uint16_t)((crc16 >> 8) | (crc16 << 8));
-                crc16 ^= (uint16_t) b & 0xFF;
-                crc16 ^= (uint16_t) ((crc16 & 0xFF) >> 4);
-                crc16 ^= (uint16_t) ((crc16 << 8) << 4);
-                crc16 ^= (uint16_t) (((crc16 & 0xFF) << 4) << 1);
+                crc = (uint16_t)((crc >> 8) | (crc << 8));
+                crc ^= (uint16_t) b & 0xFF;
+                crc ^= (uint16_t) ((crc & 0xFF) >> 4);
+                crc ^= (uint16_t) ((crc << 8) << 4);
+                crc ^= (uint16_t) (((crc & 0xFF) << 4) << 1);
             }
             
             // Check if the CRC matches
             bool checkCrc(uint16_t messageCrc)
             {
-                crcOk = (messageCrc == crc16);
+                crcOk = (messageCrc == crc);
                 return crcOk;
             }
             
@@ -327,7 +330,8 @@ namespace esphome
                 gasConsumption = 0;
                 waterConsumption = 0;
                 
-                crc16 = 0;
+                crc = 0;
+                sensorsToSend = 32; // Initialize to 32 to include all sensors
             }
         };
     } // namespace p1_reader
