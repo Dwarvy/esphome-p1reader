@@ -14,7 +14,8 @@ esp8266:
   restore_from_flash: true
 
 external_components:
-  - source: ../esphome-components
+  - source: components
+# Using the local components directory where we've been making our edits
 # source: ../esphome-components is a reference to where in your HA config folder you put the contents of that repo folder relative to the YAML file
 # source: github://xxx/esphome-p1reader@main to pull from branch main in the github repo called esphome-p1reader by the user xxx ()
 
