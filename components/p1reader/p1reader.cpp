@@ -224,31 +224,49 @@ namespace esphome
     
         void P1Reader::readP1MessageAscii()
         {
-            static String currentTelegram = "";
+            // Use a static buffer to collect the complete telegram
+            static char telegramBuffer[4096] = {0}; // Large enough for P1 telegrams
+            static size_t telegramLen = 0;
             uint32_t start = millis();
             
             // Process available data for up to 20ms before yielding
             while (available())
             {
-                // Read a complete line until newline
-                String line = readStringUntil('\n');
+                // Use the buffer to read a line
+                memset(_buffer, 0, BUF_SIZE);
+                int len = readBytesUntilAndIncluding('\n', _buffer, BUF_SIZE-1);
                 
-                if (line.length() > 0) {
-                    // Add the line with newline character to our telegram
-                    currentTelegram += line + "\n";
+                if (len > 0) {
+                    // Ensure null termination
+                    _buffer[len] = '\0';
                     
-                    ESP_LOGV("data", "Line received: %s", line.c_str());
+                    ESP_LOGV("data", "Line received: %s", _buffer);
                     
-                    // Check if this is the end of telegram (line starts with !)
-                    if (line.charAt(0) == '!') {
-                        ESP_LOGI("telegram", "Complete telegram received, length: %d", currentTelegram.length());
+                    // Check if we have space in the telegram buffer
+                    if (telegramLen + len < sizeof(telegramBuffer)) {
+                        // Add the line to our telegram buffer
+                        memcpy(telegramBuffer + telegramLen, _buffer, len);
+                        telegramLen += len;
                         
-                        // Process the complete telegram
-                        processTelegram(currentTelegram.c_str());
-                        
-                        // Clear buffer for the next telegram
-                        currentTelegram = "";
-                        _parsedMessage.telegramComplete = true;
+                        // Check if this is the end of telegram (line starts with !)
+                        if (_buffer[0] == '!') {
+                            ESP_LOGI("telegram", "Complete telegram received, length: %d", telegramLen);
+                            
+                            // Add null termination
+                            telegramBuffer[telegramLen] = '\0';
+                            
+                            // Process the complete telegram
+                            processTelegram(telegramBuffer);
+                            
+                            // Clear buffer for the next telegram
+                            memset(telegramBuffer, 0, sizeof(telegramBuffer));
+                            telegramLen = 0;
+                            _parsedMessage.telegramComplete = true;
+                        }
+                    } else {
+                        ESP_LOGW("telegram", "Telegram buffer overflow, discarding data");
+                        memset(telegramBuffer, 0, sizeof(telegramBuffer));
+                        telegramLen = 0;
                     }
                 }
                 
