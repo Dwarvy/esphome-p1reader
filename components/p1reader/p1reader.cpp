@@ -287,33 +287,71 @@ namespace esphome
             const char* pos = telegram;
             const char* eol;
             
+            // First pass: Calculate CRC over the entire telegram except the CRC line
+            const char* endPos = nullptr;
             while ((eol = strchr(pos, '\n')) != nullptr) {
                 // Calculate length of this line (excluding newline)
                 size_t lineLen = eol - pos;
                 
-                // Copy line to buffer for processing
-                if (lineLen < BUF_SIZE) {
-                    memcpy(_buffer, pos, lineLen);
-                    _buffer[lineLen] = '\0';
+                // Check if this is the CRC line (starts with !)
+                if (*pos == '!') {
+                    endPos = pos;  // Mark the position of the CRC line
+                    break;
+                }
+                
+                // Update CRC for this line
+                for (size_t i = 0; i < lineLen; i++) {
+                    _parsedMessage.updateCrc16(pos[i]);
+                }
+                
+                // Include the newline character in CRC calculation
+                _parsedMessage.updateCrc16('\n');
+                
+                // Move to next line
+                pos = eol + 1;
+            }
+            
+            // Process the CRC line
+            if (endPos && *endPos == '!') {
+                // Add the ! to the CRC
+                _parsedMessage.updateCrc16('!');
+                
+                // Extract the CRC value from the message (after the !)
+                char crcBuffer[8] = {0};
+                size_t crcLen = 0;
+                endPos++; // Skip the !
+                
+                // Copy the CRC hex digits
+                while (isxdigit(*endPos) && crcLen < 6) {
+                    crcBuffer[crcLen++] = *endPos++;
+                }
+                
+                // Convert hex string to integer
+                int crcFromMsg = (int)strtol(crcBuffer, NULL, 16);
+                _parsedMessage.checkCrc(crcFromMsg);
+                
+                ESP_LOGI("crc", "Telegram read. CRC: %04X = %04X. PASS = %s", 
+                         _parsedMessage.crc, crcFromMsg, _parsedMessage.crcOk ? "YES": "NO");
+            }
+            
+            // Second pass: Parse the data lines
+            pos = telegram;
+            static char lineCopy[256];  // Static buffer for line processing, large enough for 115+ byte lines
+            
+            while ((eol = strchr(pos, '\n')) != nullptr) {
+                // Calculate length of this line (excluding newline)
+                size_t lineLen = eol - pos;
+                
+                if (lineLen < sizeof(lineCopy) - 1) {
+                    // Copy line to buffer for processing
+                    memcpy(lineCopy, pos, lineLen);
+                    lineCopy[lineLen] = '\0';  // Null-terminate the string
                     
-                    // Process the line
-                    if (_buffer[0] == '!') {
-                        // This is the CRC line
-                        _parsedMessage.updateCrc16('!');
-                        int crcFromMsg = (int) strtol(_buffer + 1, NULL, 16);
-                        _parsedMessage.checkCrc(crcFromMsg);
-                        
-                        ESP_LOGI("crc", "Telegram read. CRC: %04X = %04X. PASS = %s", 
-                               _parsedMessage.crc, crcFromMsg, _parsedMessage.crcOk ? "YES": "NO");
-                    } else {
-                        // Regular line, update CRC and parse data if relevant
-                        for (size_t i = 0; i < lineLen; i++) {
-                            _parsedMessage.updateCrc16(_buffer[i]);
-                        }
-                        
+                    // Process the line if it's not the CRC line
+                    if (lineCopy[0] != '!') {
                         // Check if this is a data line with OBIS code
-                        if (strchr(_buffer, '(') != NULL) {
-                            char* dataId = strtok(_buffer, DELIMITERS);
+                        if (strchr(lineCopy, '(') != NULL) {
+                            char* dataId = strtok(lineCopy, DELIMITERS);
                             char* obisCode = strtok(NULL, DELIMITERS);
                             
                             // Check if this is a data row with value
