@@ -14,8 +14,8 @@ esp8266:
   restore_from_flash: true
 
 external_components:
-  - source: components
-# Using the local components directory where we've been making our edits
+  # Replace with your actual GitHub username and repository
+  - source: github://yourusername/esphome-p1reader@main
 # source: ../esphome-components is a reference to where in your HA config folder you put the contents of that repo folder relative to the YAML file
 # source: github://xxx/esphome-p1reader@main to pull from branch main in the github repo called esphome-p1reader by the user xxx ()
 
@@ -51,6 +51,7 @@ uart:
   rx_pin: RX
   baud_rate: 115200
   rx_buffer_size: 3072    # UART Buffer size controls polling frequency
+  invert: true          # Most P1 meters require inverted signal
 
 p1reader:
   - id: p1reader_esp
