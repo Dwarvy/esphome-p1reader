@@ -202,6 +202,30 @@ namespace esphome
                             if (momentary_reactive_export_l3 != nullptr)
                                 momentary_reactive_export_l3->publish_state(parsedMessage->momentaryReactiveExportL3);
                             break;
+                        case 27:
+                            if (cumulative_active_import_t1 != nullptr)
+                                cumulative_active_import_t1->publish_state(parsedMessage->cumulativeActiveImportT1);
+                            break;
+                        case 28:
+                            if (cumulative_active_import_t2 != nullptr)
+                                cumulative_active_import_t2->publish_state(parsedMessage->cumulativeActiveImportT2);
+                            break;
+                        case 29:
+                            if (cumulative_active_export_t1 != nullptr)
+                                cumulative_active_export_t1->publish_state(parsedMessage->cumulativeActiveExportT1);
+                            break;
+                        case 30:
+                            if (cumulative_active_export_t2 != nullptr)
+                                cumulative_active_export_t2->publish_state(parsedMessage->cumulativeActiveExportT2);
+                            break;
+                        case 31:
+                            if (gas_consumption != nullptr)
+                                gas_consumption->publish_state(parsedMessage->gasConsumption);
+                            break;
+                        case 32:
+                            if (water_consumption != nullptr)
+                                water_consumption->publish_state(parsedMessage->waterConsumption);
+                            break;
                         default:
                             // Unused
                             break;
