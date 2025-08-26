@@ -224,77 +224,96 @@ namespace esphome
     
         void P1Reader::readP1MessageAscii()
         {
+            static String currentTelegram = "";
             uint32_t start = millis();
+            
+            // Process available data for up to 20ms before yielding
             while (available())
             {
-                int len = readBytesUntilAndIncluding('\n', _buffer + _bufferLen, BUF_SIZE-_bufferLen);
-
-                if (len > 0)
-                {
-                    _bufferLen += len;
-                    bool lineComplete = _buffer[_bufferLen-1] == '\n';
+                // Read a complete line until newline
+                String line = readStringUntil('\n');
                 
-                    if (lineComplete)
-                    {
-                        // if we've reached the CRC checksum, calculate last CRC and compare
-                        if (_buffer[0] == '!')
-                        {
-                            _parsedMessage.updateCrc16(_buffer[0]);
-                            int crcFromMsg = (int) strtol(_buffer + 1, NULL, 16);
-                            _parsedMessage.checkCrc(crcFromMsg);
-
-                            ESP_LOGI("crc", "Telegram read. CRC: %04X = %04X. PASS = %s", 
-                                    _parsedMessage.crc, crcFromMsg, _parsedMessage.crcOk ? "YES": "NO");
-
-                        // otherwise pass the row through the CRC calculation
-                        } 
-                        else 
-                        {
-                            for (int i = 0; i < _bufferLen; i++)
-                            {
-                                _parsedMessage.updateCrc16(_buffer[i]);
-                            }
-                        }
-
-                        // Remove CR LF before logging and processing
-                        _buffer[_bufferLen-1] = '\0';
-                        if (_buffer[_bufferLen-2] == '\r')
-                            _buffer[_bufferLen-2] = '\0';
-
-                        ESP_LOGV("data", "Complete line [%s] received", _buffer);
-
-                        // if this is a row containing information
-                        if (strchr(_buffer, '(') != NULL)
-                        {
-                            char* dataId = strtok(_buffer, DELIMITERS);
-                            char* obisCode = strtok(NULL, DELIMITERS);
-
-                            // ...and this row is a data row, then parse row
-                            if (strncmp(DATA_ID, dataId, strlen(DATA_ID)) == 0)
-                            {
-                                char* value = strtok(NULL, DELIMITERS);
-                                char* unit = strtok(NULL, DELIMITERS);
-                                _parsedMessage.parseRow(obisCode, value);
-                            }
-                        }
-
-                        // clean buffer for next line
-                        memset(_buffer, 0, BUF_SIZE);
-                        _bufferLen = 0;
-                    } 
-                    else 
-                    {
-                        ESP_LOGV("data", "Partial line [%s] received, busywaiting for one byte", _buffer);
-                        // if we did not get a complete line, busywait for a single byte over uart
-                        delayMicroseconds(_uSecondsPerByte);
+                if (line.length() > 0) {
+                    // Add the line with newline character to our telegram
+                    currentTelegram += line + "\n";
+                    
+                    ESP_LOGV("data", "Line received: %s", line.c_str());
+                    
+                    // Check if this is the end of telegram (line starts with !)
+                    if (line.charAt(0) == '!') {
+                        ESP_LOGI("telegram", "Complete telegram received, length: %d", currentTelegram.length());
+                        
+                        // Process the complete telegram
+                        processTelegram(currentTelegram.c_str());
+                        
+                        // Clear buffer for the next telegram
+                        currentTelegram = "";
+                        _parsedMessage.telegramComplete = true;
                     }
                 }
-
-                if ((millis() - start) > 20)
-                {
-                    ESP_LOGD("ascii", "Waiting for the next time slice while reading message...");
+                
+                // Yield control if we've been processing for more than 20ms
+                if ((millis() - start) > 20) {
+                    ESP_LOGV("ascii", "Yielding time slice after reading data");
                     break;
                 }
+            }
+        }
+        
+        void P1Reader::processTelegram(const char* telegram)
+        {
+            // Reset CRC and message parsing state
+            _parsedMessage.initNewTelegram();
+            
+            // Process the telegram line by line
+            const char* pos = telegram;
+            const char* eol;
+            
+            while ((eol = strchr(pos, '\n')) != nullptr) {
+                // Calculate length of this line (excluding newline)
+                size_t lineLen = eol - pos;
+                
+                // Copy line to buffer for processing
+                if (lineLen < BUF_SIZE) {
+                    memcpy(_buffer, pos, lineLen);
+                    _buffer[lineLen] = '\0';
+                    
+                    // Process the line
+                    if (_buffer[0] == '!') {
+                        // This is the CRC line
+                        _parsedMessage.updateCrc16('!');
+                        int crcFromMsg = (int) strtol(_buffer + 1, NULL, 16);
+                        _parsedMessage.checkCrc(crcFromMsg);
+                        
+                        ESP_LOGI("crc", "Telegram read. CRC: %04X = %04X. PASS = %s", 
+                               _parsedMessage.crc, crcFromMsg, _parsedMessage.crcOk ? "YES": "NO");
+                    } else {
+                        // Regular line, update CRC and parse data if relevant
+                        for (size_t i = 0; i < lineLen; i++) {
+                            _parsedMessage.updateCrc16(_buffer[i]);
+                        }
+                        
+                        // Check if this is a data line with OBIS code
+                        if (strchr(_buffer, '(') != NULL) {
+                            char* dataId = strtok(_buffer, DELIMITERS);
+                            char* obisCode = strtok(NULL, DELIMITERS);
+                            
+                            // Check if this is a data row with value
+                            if (dataId && obisCode && strncmp(DATA_ID, dataId, strlen(DATA_ID)) == 0) {
+                                char* value = strtok(NULL, DELIMITERS);
+                                char* unit = strtok(NULL, DELIMITERS);
+                                if (value) {
+                                    _parsedMessage.parseRow(obisCode, value);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    ESP_LOGW("telegram", "Line too long to process: %d bytes", lineLen);
+                }
+                
+                // Move to the start of the next line (skip the newline)
+                pos = eol + 1;
             }
         }
 

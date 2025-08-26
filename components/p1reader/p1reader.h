@@ -95,7 +95,7 @@ namespace esphome
             // ASCII
             const char* DELIMITERS = "()*:";
             const char* DATA_ID = "1-0";
-
+            void processTelegram(const char* telegram);
             size_t readBytesUntilAndIncluding(char terminator, char *buffer, size_t length);
 
             // HLDC
