@@ -253,102 +253,38 @@ namespace esphome
             { 
                 current_l3 = sensor;
             }
-
+            
+            // DSMR tariff sensors setters
             void set_sensor_cumulative_active_import_t1(sensor::Sensor* sensor)
             { 
                 cumulative_active_import_t1 = sensor;
             }
-        momentary_active_import_l3 = sensor;
-    }
-    void set_sensor_momentary_active_export_l3(sensor::Sensor *sensor)
-    {
-        momentary_active_export_l3 = sensor;
-    }
-
-    void set_sensor_momentary_reactive_import_l1(sensor::Sensor *sensor)
-    {
-        momentary_reactive_import_l1 = sensor;
-    }
-    void set_sensor_momentary_reactive_export_l1(sensor::Sensor *sensor)
-    {
-        momentary_reactive_export_l1 = sensor;
-    }
-
-    void set_sensor_momentary_reactive_import_l2(sensor::Sensor *sensor)
-    {
-        momentary_reactive_import_l2 = sensor;
-    }
-    void set_sensor_momentary_reactive_export_l2(sensor::Sensor *sensor)
-    {
-        momentary_reactive_export_l2 = sensor;
-    }
-
-    void set_sensor_momentary_reactive_import_l3(sensor::Sensor *sensor)
-    {
-        momentary_reactive_import_l3 = sensor;
-    }
-    void set_sensor_momentary_reactive_export_l3(sensor::Sensor *sensor)
-    {
-        momentary_reactive_export_l3 = sensor;
-    }
-
-    void set_sensor_voltage_l1(sensor::Sensor* sensor)
-    {
-        voltage_l1 = sensor;
-    }
-    void set_sensor_voltage_l2(sensor::Sensor* sensor)
-    {
-        voltage_l2 = sensor;
-    }
-    void set_sensor_voltage_l3(sensor::Sensor* sensor)
-    {
-        voltage_l3 = sensor;
-    }
-
-    void set_sensor_current_l1(sensor::Sensor* sensor)
-    {
-        current_l1 = sensor;
-    }
-    void set_sensor_current_l2(sensor::Sensor* sensor)
-    {
-        current_l2 = sensor;
-    }
-    void set_sensor_current_l3(sensor::Sensor* sensor)
-    { 
-        current_l3 = sensor;
-    }
             
-    // DSMR tariff sensors setters
-    void set_sensor_cumulative_active_import_t1(sensor::Sensor* sensor)
-    { 
-        cumulative_active_import_t1 = sensor;
-    }
+            void set_sensor_cumulative_active_import_t2(sensor::Sensor* sensor)
+            { 
+                cumulative_active_import_t2 = sensor;
+            }
             
-    void set_sensor_cumulative_active_import_t2(sensor::Sensor* sensor)
-    { 
-        cumulative_active_import_t2 = sensor;
-    }
+            void set_sensor_cumulative_active_export_t1(sensor::Sensor* sensor)
+            { 
+                cumulative_active_export_t1 = sensor;
+            }
             
-    void set_sensor_cumulative_active_export_t1(sensor::Sensor* sensor)
-    { 
-        cumulative_active_export_t1 = sensor;
-    }
+            void set_sensor_cumulative_active_export_t2(sensor::Sensor* sensor)
+            { 
+                cumulative_active_export_t2 = sensor;
+            }
             
-    void set_sensor_cumulative_active_export_t2(sensor::Sensor* sensor)
-    { 
-        cumulative_active_export_t2 = sensor;
-    }
+            // Gas and water sensors setters
+            void set_sensor_gas_consumption(sensor::Sensor* sensor)
+            { 
+                gas_consumption = sensor;
+            }
             
-    // Gas and water sensors setters
-    void set_sensor_gas_consumption(sensor::Sensor* sensor)
-    { 
-        gas_consumption = sensor;
+            void set_sensor_water_consumption(sensor::Sensor* sensor)
+            { 
+                water_consumption = sensor;
+            }
+        };
     }
-            
-    void set_sensor_water_consumption(sensor::Sensor* sensor)
-    { 
-        water_consumption = sensor;
-    }
-};
-}
 }
