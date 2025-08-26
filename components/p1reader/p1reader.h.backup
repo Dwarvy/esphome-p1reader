@@ -8,7 +8,6 @@
 //  0.2.0 2023-08-14:   Some optimizations when ESPHome started to complain about execution times
 //  0.3.0 2023-08-23:   Rework structure to merge above changes with HDLC stuff
 //  0.4.0 2025-02-23:   Rework as external component
-//  0.5.0 2025-08-26:   Added DSMR specific tariff readings and gas/water consumption
 //
 // MIT License
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -53,7 +52,6 @@ namespace esphome
             uint16_t _bufferLen;
             int _uSecondsPerByte;
 
-            // Standard power readings
             sensor::Sensor *cumulative_active_import{nullptr};
             sensor::Sensor *cumulative_active_export{nullptr};
 
@@ -66,7 +64,6 @@ namespace esphome
             sensor::Sensor *momentary_reactive_import{nullptr};
             sensor::Sensor *momentary_reactive_export{nullptr};
 
-            // Phase specific readings
             sensor::Sensor *momentary_active_import_l1{nullptr};
             sensor::Sensor *momentary_active_export_l1{nullptr};
 
@@ -231,33 +228,64 @@ namespace esphome
             void set_sensor_voltage_l1(sensor::Sensor* sensor)
             {
                 voltage_l1 = sensor;
-            }
-            void set_sensor_voltage_l2(sensor::Sensor* sensor)
-            {
-                voltage_l2 = sensor;
-            }
-            void set_sensor_voltage_l3(sensor::Sensor* sensor)
-            {
-                voltage_l3 = sensor;
-            }
+    }
 
-            void set_sensor_current_l1(sensor::Sensor* sensor)
-            {
-                current_l1 = sensor;
-            }
-            void set_sensor_current_l2(sensor::Sensor* sensor)
-            {
-                current_l2 = sensor;
-            }
-            void set_sensor_current_l3(sensor::Sensor* sensor)
-            { 
-                current_l3 = sensor;
-            }
+    void set_sensor_cumulative_active_import(sensor::Sensor *sensor)
+    {
+        cumulative_active_import = sensor;
+    }
+    void set_sensor_cumulative_active_export(sensor::Sensor *sensor)
+    { 
+        cumulative_active_export = sensor; 
+    }
 
-            void set_sensor_cumulative_active_import_t1(sensor::Sensor* sensor)
-            { 
-                cumulative_active_import_t1 = sensor;
-            }
+    void set_sensor_cumulative_reactive_import(sensor::Sensor *sensor)
+    {
+        cumulative_reactive_import = sensor;
+    }
+    void set_sensor_cumulative_reactive_export(sensor::Sensor *sensor)
+    {
+        cumulative_reactive_export = sensor;
+    }
+
+    void set_sensor_momentary_active_import(sensor::Sensor *sensor)
+    {
+        momentary_active_import = sensor;
+    }
+    void set_sensor_momentary_active_export(sensor::Sensor *sensor)
+    {
+        momentary_active_export = sensor;
+    }
+
+    void set_sensor_momentary_reactive_import(sensor::Sensor *sensor)
+    {
+        momentary_reactive_import = sensor;
+    }
+    void set_sensor_momentary_reactive_export(sensor::Sensor *sensor)
+    {
+        momentary_reactive_export = sensor;
+    }
+
+    void set_sensor_momentary_active_import_l1(sensor::Sensor *sensor)
+    {
+        momentary_active_import_l1 = sensor;
+    }
+    void set_sensor_momentary_active_export_l1(sensor::Sensor *sensor)
+    {
+        momentary_active_export_l1 = sensor;
+    }
+
+    void set_sensor_momentary_active_import_l2(sensor::Sensor *sensor)
+    {
+        momentary_active_import_l2 = sensor;
+    }
+    void set_sensor_momentary_active_export_l2(sensor::Sensor *sensor)
+    {
+        momentary_active_export_l2 = sensor;
+    }
+
+    void set_sensor_momentary_active_import_l3(sensor::Sensor *sensor)
+    {
         momentary_active_import_l3 = sensor;
     }
     void set_sensor_momentary_active_export_l3(sensor::Sensor *sensor)

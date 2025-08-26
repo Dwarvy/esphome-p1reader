@@ -6,6 +6,7 @@ namespace esphome
     {
         class ParsedMessage {
         public:
+            // Standard readings
             double cumulativeActiveImport;
             double cumulativeActiveExport;
 
@@ -18,6 +19,7 @@ namespace esphome
             double momentaryReactiveImport;
             double momentaryReactiveExport;
 
+            // Phase-specific readings
             double momentaryActiveImportL1;
             double momentaryActiveExportL1;
 
@@ -44,10 +46,19 @@ namespace esphome
             double currentL2;
             double currentL3;
             
+            // DSMR-specific multi-tariff readings
+            double cumulativeActiveImportT1;  // Tariff 1 import
+            double cumulativeActiveImportT2;  // Tariff 2 import
+            double cumulativeActiveExportT1;  // Tariff 1 export
+            double cumulativeActiveExportT2;  // Tariff 2 export
+            
             // Additional measurements
-            double gasConsumption;  // Gas consumption
-            double waterConsumption; // Water consumption
+            double gasConsumption;      // Gas consumption
+            double waterConsumption;    // Water consumption
             double externalTemperature; // External temperature if available
+            
+            // Timestamp from telegram if available
+            char timestamp[20];         // For storing timestamp from telegram
 
             uint16_t crc;
             bool telegramComplete;
@@ -68,26 +79,47 @@ namespace esphome
                 
                 int obisCodeLen = strnlen(obisCode, 16);  // Increased max length to handle longer OBIS codes
                 
-                // KAIFA meters often use these OBIS codes for gas and water
+                // DSMR / KAIFA specific tariff readings (T1/T2)
                 
-                // Gas measurement patterns
-                // Standard: 0.24.2.1.1.1, 0.24.3.0
-                // DSMR format: 0-1:24.2.1(.1.1)
-                if (strstr(obisCode, "24.2") != nullptr || 
-                    strstr(obisCode, "0-1:24.2.1") != nullptr ||
-                    strstr(obisCode, "0-1:24.3.0") != nullptr) {
+                // Electricity tariff 1 import (DSMR: 1-0:1.8.1)
+                if (strstr(obisCode, "1.8.1") != nullptr || strstr(obisCode, "1-0:1.8.1") != nullptr) {
+                    cumulativeActiveImportT1 = obisValue;
+                    ESP_LOGI("obis", "T1 Import: %f kWh", cumulativeActiveImportT1);
+                    return;
+                }
+                
+                // Electricity tariff 2 import (DSMR: 1-0:1.8.2)
+                if (strstr(obisCode, "1.8.2") != nullptr || strstr(obisCode, "1-0:1.8.2") != nullptr) {
+                    cumulativeActiveImportT2 = obisValue;
+                    ESP_LOGI("obis", "T2 Import: %f kWh", cumulativeActiveImportT2);
+                    return;
+                }
+                
+                // Electricity tariff 1 export (DSMR: 1-0:2.8.1)
+                if (strstr(obisCode, "2.8.1") != nullptr || strstr(obisCode, "1-0:2.8.1") != nullptr) {
+                    cumulativeActiveExportT1 = obisValue;
+                    ESP_LOGI("obis", "T1 Export: %f kWh", cumulativeActiveExportT1);
+                    return;
+                }
+                
+                // Electricity tariff 2 export (DSMR: 1-0:2.8.2)
+                if (strstr(obisCode, "2.8.2") != nullptr || strstr(obisCode, "1-0:2.8.2") != nullptr) {
+                    cumulativeActiveExportT2 = obisValue;
+                    ESP_LOGI("obis", "T2 Export: %f kWh", cumulativeActiveExportT2);
+                    return;
+                }
+                
+                // Gas measurement patterns - DSMR format used by KAIFA
+                // Common patterns: 0-1:24.2.1, 0-1:24.3.0, or 0-2:24.2.1
+                if (strstr(obisCode, "24.2.1") != nullptr || 
+                    strstr(obisCode, "24.3.0") != nullptr) {
                     gasConsumption = obisValue;
-                    ESP_LOGI("obis", "Gas consumption: %f", gasConsumption);
+                    ESP_LOGI("obis", "Gas consumption: %f m³", gasConsumption);
                     return;
                 }
                 
                 // Water measurement patterns
-                // Standard: 0-1:24.4.0
-                // KAIFA often uses: 0-n:24.4.0 where n can be 2,3,4
-                if (strstr(obisCode, "24.4") != nullptr ||
-                    strstr(obisCode, "0-2:24") != nullptr ||
-                    strstr(obisCode, "0-3:24") != nullptr ||
-                    strstr(obisCode, "0-4:24") != nullptr) {
+                if (strstr(obisCode, "24.4") != nullptr) {
                     waterConsumption = obisValue;
                     ESP_LOGI("obis", "Water consumption: %f", waterConsumption);
                     return;
@@ -296,7 +328,7 @@ namespace esphome
                 crc = 0x0000;
                 telegramComplete = false;
                 crcOk = false;
-                sensorsToSend = 26;
+                sensorsToSend = 32; // Updated to include tariff (T1/T2) and gas/water consumption sensors
             }
 
             void updateCrc16(uint8_t a)
