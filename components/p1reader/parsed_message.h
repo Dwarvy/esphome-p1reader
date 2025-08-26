@@ -77,7 +77,32 @@ namespace esphome
                 // For debugging purposes, log the OBIS code and value
                 ESP_LOGD("obis", "Processing OBIS code: %s = %f", obisCode, obisValue);
                 
-                int obisCodeLen = strnlen(obisCode, 16);  // Increased max length to handle longer OBIS codes
+                size_t obisCodeLen = strlen(obisCode);
+                
+                // KAIFA meter specific OBIS codes for current values
+                if (strstr(obisCode, "31.7.0") != nullptr) {
+                    // Current L1 (A) - KAIFA/DSMR format - Following Python implementation
+                    int currentValue = static_cast<int>(obisValue);
+                    currentL1 = currentValue;
+                    ESP_LOGI("obis", "Current L1: %d A (OBIS: %s)", currentValue, obisCode);
+                    return;
+                }
+                
+                if (strstr(obisCode, "51.7.0") != nullptr) {
+                    // Current L2 (A) - KAIFA/DSMR format - Following Python implementation
+                    int currentValue = static_cast<int>(obisValue);
+                    currentL2 = currentValue;
+                    ESP_LOGI("obis", "Current L2: %d A (OBIS: %s)", currentValue, obisCode);
+                    return;
+                }
+                
+                if (strstr(obisCode, "71.7.0") != nullptr) {
+                    // Current L3 (A) - KAIFA/DSMR format - Following Python implementation
+                    int currentValue = static_cast<int>(obisValue);
+                    currentL3 = currentValue;
+                    ESP_LOGI("obis", "Current L3: %d A (OBIS: %s)", currentValue, obisCode);
+                    return;
+                }
                 
                 // DSMR / KAIFA specific tariff readings (T1/T2)
                 
@@ -185,35 +210,72 @@ namespace esphome
                                 {
                                     case '2': 
                                         momentaryActiveImportL1 = obisValue;
-                                        break;
-                                    case '3': 
-                                        // Fix for the current parsing - limit to realistic values
-                                        if (obisValue > -1000 && obisValue < 1000) {
-                                            currentL1 = obisValue;
-                                        } else {
-                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                        if (strstr(obisCode, "31.7.0") != nullptr) // Current L1 (A) - KAIFA/DSMR format
+                                        {
+                                            // Parse KAIFA format: value is typically in the form "002*A" where A is the unit
+                                            // Convert to integer as the Python implementation does
+                                            int currentValue = static_cast<int>(obisValue);
+                                            currentL1 = currentValue;
+                                            ESP_LOGI("obis", "Current L1: %d A (OBIS: %s, Raw: %f)", currentValue, obisCode, obisValue);
+                                        }
+                                        else if (strstr(obisCode, "32.7.0") != nullptr) // Alternative OBIS code for Current L1
+                                        {
+                                            // Fix for the current parsing - limit to realistic values
+                                            if (obisValue > -1000 && obisValue < 1000) {
+                                                currentL1 = obisValue;
+                                                ESP_LOGI("obis", "Current L1 (alt): %f A (OBIS: %s)", obisValue, obisCode);
+                                            } else {
+                                                ESP_LOGW("obis", "Unrealistic current value ignored: %f (OBIS: %s)", obisValue, obisCode);
+                                            }
                                         }
                                         break;
                                     case '4': 
                                         momentaryActiveImportL2 = obisValue;
                                         break;
                                     case '5': 
-                                        // Fix for the current parsing - limit to realistic values
+                                        if (strstr(obisCode, "31.7.0") != nullptr) // Current L2 (A) - KAIFA/DSMR format
+                                        {
+                                            // Parse KAIFA format: value is typically in the form "002*A" where A is the unit
+                                            // Convert to integer as the Python implementation does
+                                            int currentValue = static_cast<int>(obisValue);
+                                            currentL2 = currentValue;
+                                            ESP_LOGI("obis", "Current L2: %d A (OBIS: %s, Raw: %f)", currentValue, obisCode, obisValue);
+                                        }
+                                        else if (strstr(obisCode, "32.7.0") != nullptr) // Alternative OBIS code for Current L2
+                                        {
+                                            // Fix for the current parsing - limit to realistic values
+                                            if (obisValue > -1000 && obisValue < 1000) {
+                                                currentL2 = obisValue;
+                                                ESP_LOGI("obis", "Current L2 (alt): %f A (OBIS: %s)", obisValue, obisCode);
+                                            } else {
+                                                ESP_LOGW("obis", "Unrealistic current value ignored: %f (OBIS: %s)", obisValue, obisCode);
+                                            }
                                         if (obisValue > -1000 && obisValue < 1000) {
                                             currentL2 = obisValue;
+                                            ESP_LOGI("obis", "Current L2: %f A (OBIS: %s)", obisValue, obisCode);
                                         } else {
-                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f (OBIS: %s)", obisValue, obisCode);
                                         }
                                         break;
-                                    case '6': 
+                                    case '5': 
                                         momentaryActiveImportL3 = obisValue;
-                                        break;
-                                    case '7': 
-                                        // Fix for the current parsing - limit to realistic values
-                                        if (obisValue > -1000 && obisValue < 1000) {
-                                            currentL3 = obisValue;
-                                        } else {
-                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                        if (strstr(obisCode, "31.7.0") != nullptr) // Current L3 (A) - KAIFA/DSMR format
+                                        {
+                                            // Parse KAIFA format: value is typically in the form "002*A" where A is the unit
+                                            // Convert to integer as the Python implementation does
+                                            int currentValue = static_cast<int>(obisValue);
+                                            currentL3 = currentValue;
+                                            ESP_LOGI("obis", "Current L3: %d A (OBIS: %s, Raw: %f)", currentValue, obisCode, obisValue);
+                                        }
+                                        else if (strstr(obisCode, "32.7.0") != nullptr) // Alternative OBIS code for Current L3
+                                        {
+                                            // Fix for the current parsing - limit to realistic values
+                                            if (obisValue > -1000 && obisValue < 1000) {
+                                                currentL3 = obisValue;
+                                                ESP_LOGI("obis", "Current L3 (alt): %f A (OBIS: %s)", obisValue, obisCode);
+                                            } else {
+                                                ESP_LOGW("obis", "Unrealistic current value ignored: %f (OBIS: %s)", obisValue, obisCode);
+                                            }
                                         }
                                         break;
                                     default: break;
