@@ -43,6 +43,11 @@ namespace esphome
             double currentL1;
             double currentL2;
             double currentL3;
+            
+            // Additional measurements
+            double gasConsumption;  // Gas consumption
+            double waterConsumption; // Water consumption
+            double externalTemperature; // External temperature if available
 
             uint16_t crc;
             bool telegramComplete;
@@ -58,9 +63,35 @@ namespace esphome
 
             void parseRow(const char* obisCode, double obisValue)
             {
-                int obisCodeLen = strnlen(obisCode, 7);
+                // For debugging purposes, log the OBIS code and value
+                ESP_LOGD("obis", "Processing OBIS code: %s = %f", obisCode, obisValue);
                 
-                if (obisCode[obisCodeLen-1] == '0' &&
+                int obisCodeLen = strnlen(obisCode, 16);  // Increased max length to handle longer OBIS codes
+                
+                // Gas measurement - typically 0.24.2.1.1.1, 0.24.3.0, or 0-1:24.2.1.1.1
+                if (strstr(obisCode, "24.2") != nullptr) {
+                    gasConsumption = obisValue;
+                    ESP_LOGI("obis", "Gas consumption: %f", gasConsumption);
+                    return;
+                }
+                
+                // Water measurement - typically 0-1:24.4.0 or similar
+                if (strstr(obisCode, "24.4") != nullptr) {
+                    waterConsumption = obisValue;
+                    ESP_LOGI("obis", "Water consumption: %f", waterConsumption);
+                    return;
+                }
+                
+                // External temperature - varies by meter
+                if (strstr(obisCode, "96.1.10") != nullptr) {
+                    externalTemperature = obisValue;
+                    ESP_LOGI("obis", "External temperature: %f", externalTemperature);
+                    return;
+                }
+                
+                // Standard electricity measurements
+                if (obisCodeLen >= 5 && 
+                    obisCode[obisCodeLen-1] == '0' &&
                     obisCode[obisCodeLen-2] == '.' &&
                     obisCode[obisCodeLen-4] == '.')
                 {
@@ -113,19 +144,34 @@ namespace esphome
                                         momentaryActiveImportL1 = obisValue;
                                         break;
                                     case '3': 
-                                        currentL1 = obisValue;
+                                        // Fix for the current parsing - limit to realistic values
+                                        if (obisValue > -1000 && obisValue < 1000) {
+                                            currentL1 = obisValue;
+                                        } else {
+                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                        }
                                         break;
                                     case '4': 
                                         momentaryActiveImportL2 = obisValue;
                                         break;
                                     case '5': 
-                                        currentL2 = obisValue;
+                                        // Fix for the current parsing - limit to realistic values
+                                        if (obisValue > -1000 && obisValue < 1000) {
+                                            currentL2 = obisValue;
+                                        } else {
+                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                        }
                                         break;
                                     case '6': 
                                         momentaryActiveImportL3 = obisValue;
                                         break;
                                     case '7': 
-                                        currentL3 = obisValue;
+                                        // Fix for the current parsing - limit to realistic values
+                                        if (obisValue > -1000 && obisValue < 1000) {
+                                            currentL3 = obisValue;
+                                        } else {
+                                            ESP_LOGW("obis", "Unrealistic current value ignored: %f", obisValue);
+                                        }
                                         break;
                                     default: break;
                                 }
