@@ -10,13 +10,8 @@ esphome:
     version: "1.0"
 
 esp8266:
-  board: d1_mini  # Use d1_mini to match your actual board type from the error log
+  board: d1_mini
   restore_from_flash: true
-  flash_size: 4MB
-  framework:
-    version: recommended
-    source: ~
-  board_flash_mode: dout  # Try with dout mode which is more compatible
 
 external_components:
   # Replace with your actual GitHub username and repository
@@ -39,34 +34,9 @@ captive_portal:
 logger:
   level: INFO  # Logging costs performnce, swithc to DEBUG when needed
   baud_rate: 0 # disable logging over uart (would use up a HW uart)
-  esp8266_store_log_strings_in_flash: true # Store logs in flash to save RAM
+  esp8266_store_log_strings_in_flash: false # Avoid flash wear and tear
   
-# Enable Home Assistant APIINFO ESPHome 2025.8.0
-INFO Reading configuration /config/esphome/energymeter.yaml...
-INFO Detected timezone 'Europe/Amsterdam'
-INFO Generating C++ source...
-INFO Compiling app...
-Processing energymeter (board: d1_mini; framework: arduino; platform: platformio/espressif8266@4.2.1)
---------------------------------------------------------------------------------
-HARDWARE: ESP8266 80MHz, 80KB RAM, 4MB Flash
-Dependency Graph
-|-- ESPAsyncTCP @ 2.0.0
-|-- ESP8266WiFi @ 1.0
-|-- ESPAsyncWebServer @ 3.7.10
-|-- DNSServer @ 1.1.1
-|-- ESP8266mDNS @ 1.2
-|-- noise-c @ 0.1.10
-|-- ArduinoJson @ 7.4.2
-RAM:   [======    ]  57.5% (used 47080 bytes from 81920 bytes)
-Flash: [=====     ]  49.1% (used 512509 bytes from 1044464 bytes)
-========================= [SUCCESS] Took 2.39 seconds =========================
-INFO Successfully compiled program.
-INFO Uploading to 192.168.2.185
-INFO Connecting to 192.168.2.185 port 8266...
-INFO Connected to 192.168.2.185
-INFO Uploading /data/build/energymeter/.pioenvs/energymeter/firmware.bin (516656 bytes)
-INFO Compressed to 365787 bytes
-ERROR Error binary size: Unknown error from ESP
+# Enable Home Assistant API
 api:
   encryption:
     key: !secret encryption_key
@@ -82,14 +52,16 @@ uart:
     number: RX
     inverted: true    # Most P1 meters require inverted signal
   baud_rate: 115200
-  rx_buffer_size: 2048    # Reduced from 3072 to save memory
+  rx_buffer_size: 3072    # UART Buffer size controls polling frequency
 
 p1reader:
   - id: p1reader_esp
     uart_id: uart_bus
-    # Explicitly set buffer size to a smaller value
-    buffer_size: 2048
-    protocol: ascii  # Use ASCII protocol explicitly
+#  Size of the internal working buffer (default 60)
+#    buffer_size: 3072
+#    protocol: hdlc
+#  OR (the default if left unset)
+#    protocol: ascii
 
 sensor:
   - platform: p1reader

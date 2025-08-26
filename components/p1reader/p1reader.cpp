@@ -282,10 +282,15 @@ namespace esphome
                             // Process the complete telegram
                             processTelegram(telegramBuffer);
                             
+                            // Update cumulative totals before publishing
+                            _parsedMessage.updateCumulativeTotals();
+                
+                            // Notify that the telegram is now complete
+                            _parsedMessage.telegramComplete = true;
+                            
                             // Clear buffer for the next telegram
                             memset(telegramBuffer, 0, sizeof(telegramBuffer));
                             telegramLen = 0;
-                            _parsedMessage.telegramComplete = true;
                         }
                     } else {
                         ESP_LOGW("telegram", "Telegram buffer overflow, discarding data");

@@ -118,24 +118,36 @@ namespace esphome
                 if (strstr(obisCode, "1.8.1") != nullptr || strstr(obisCode, "1-0:1.8.1") != nullptr) {
                     cumulativeActiveImportT1 = obisValue;
                     ESP_LOGI("obis", "T1 Import: %f kWh", cumulativeActiveImportT1);
+                    // Set the generic cumulative value to sum of tariffs
+                    cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                    ESP_LOGI("obis", "Total Import updated: %f kWh", cumulativeActiveImport);
                     return;
                 }
                 
                 if (strstr(obisCode, "1.8.2") != nullptr || strstr(obisCode, "1-0:1.8.2") != nullptr) {
                     cumulativeActiveImportT2 = obisValue;
                     ESP_LOGI("obis", "T2 Import: %f kWh", cumulativeActiveImportT2);
+                    // Set the generic cumulative value to sum of tariffs
+                    cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                    ESP_LOGI("obis", "Total Import updated: %f kWh", cumulativeActiveImport);
                     return;
                 }
                 
                 if (strstr(obisCode, "2.8.1") != nullptr || strstr(obisCode, "1-0:2.8.1") != nullptr) {
                     cumulativeActiveExportT1 = obisValue;
                     ESP_LOGI("obis", "T1 Export: %f kWh", cumulativeActiveExportT1);
+                    // Set the generic cumulative export value to sum of tariffs
+                    cumulativeActiveExport = cumulativeActiveExportT1 + cumulativeActiveExportT2;
+                    ESP_LOGI("obis", "Total Export updated: %f kWh", cumulativeActiveExport);
                     return;
                 }
                 
                 if (strstr(obisCode, "2.8.2") != nullptr || strstr(obisCode, "1-0:2.8.2") != nullptr) {
                     cumulativeActiveExportT2 = obisValue;
                     ESP_LOGI("obis", "T2 Export: %f kWh", cumulativeActiveExportT2);
+                    // Set the generic cumulative export value to sum of tariffs
+                    cumulativeActiveExport = cumulativeActiveExportT1 + cumulativeActiveExportT2;
+                    ESP_LOGI("obis", "Total Export updated: %f kWh", cumulativeActiveExport);
                     return;
                 }
                 
@@ -286,11 +298,24 @@ namespace esphome
                 return crcOk;
             }
             
+            // Update cumulative totals from tariffs
+            void updateCumulativeTotals() {
+                // Calculate total cumulative import from T1 + T2
+                cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                
+                // Calculate total cumulative export from T1 + T2
+                cumulativeActiveExport = cumulativeActiveExportT1 + cumulativeActiveExportT2;
+                
+                ESP_LOGI("totals", "Updated cumulative totals - Import: %f kWh, Export: %f kWh", 
+                         cumulativeActiveImport, cumulativeActiveExport);
+            }
+            
             // Constructor
             ParsedMessage()
             {
                 telegramComplete = false;
                 crcOk = false;
+                sensorsToSend = 32;
                 
                 // Initialize all values to 0
                 cumulativeActiveImport = 0;
