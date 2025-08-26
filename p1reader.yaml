@@ -193,3 +193,47 @@ sensor:
     p1reader_id: p1reader_esp
     current_l3:
       name: "Current Phase 3"
+
+  # DSMR tariff-specific readings (T1/T2)
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_import_t1:
+      name: "Day Import (T1)"
+      unit_of_measurement: "kWh"
+      accuracy_decimals: 3
+      
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_import_t2:
+      name: "Night Import (T2)"
+      unit_of_measurement: "kWh"
+      accuracy_decimals: 3
+      
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_export_t1:
+      name: "Day Export (T1)"
+      unit_of_measurement: "kWh"
+      accuracy_decimals: 3
+      
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    cumulative_active_export_t2:
+      name: "Night Export (T2)"
+      unit_of_measurement: "kWh"
+      accuracy_decimals: 3
+      
+  # Gas and water consumption if available
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    gas_consumption:
+      name: "Gas Consumption"
+      unit_of_measurement: "m³"
+      accuracy_decimals: 3
+      
+  - platform: p1reader
+    p1reader_id: p1reader_esp
+    water_consumption:
+      name: "Water Consumption"
+      unit_of_measurement: "m³"
+      accuracy_decimals: 3
