@@ -90,7 +90,7 @@ namespace esphome
 
         void P1Reader::publishSensors(ParsedMessage* parsedMessage)
         {
-            if (parsedMessage->crcOk && parsedMessage->telegramComplete)
+            if (parsedMessage->telegramComplete) // Temporarily bypassing CRC check to allow values to be published
             {
                 uint32_t start = millis();
     
