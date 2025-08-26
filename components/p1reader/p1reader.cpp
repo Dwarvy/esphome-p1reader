@@ -355,11 +355,24 @@ namespace esphome
                             char* obisCode = strtok(NULL, DELIMITERS);
                             
                             // Check if this is a data row with value
-                            if (dataId && obisCode && strncmp(DATA_ID, dataId, strlen(DATA_ID)) == 0) {
-                                char* value = strtok(NULL, DELIMITERS);
-                                char* unit = strtok(NULL, DELIMITERS);
-                                if (value) {
-                                    _parsedMessage.parseRow(obisCode, value);
+                            if (dataId && obisCode) {
+                                // Log all OBIS codes for diagnostic purposes
+                                ESP_LOGD("obis_raw", "Found OBIS code: %s with ID: %s", obisCode, dataId);
+                                
+                                if (strncmp(DATA_ID, dataId, strlen(DATA_ID)) == 0) {
+                                    char* value = strtok(NULL, DELIMITERS);
+                                    char* unit = strtok(NULL, DELIMITERS);
+                                    
+                                    // Log the complete value and unit if available
+                                    if (value) {
+                                        if (unit) {
+                                            ESP_LOGD("obis_data", "%s = %s %s", obisCode, value, unit);
+                                        } else {
+                                            ESP_LOGD("obis_data", "%s = %s", obisCode, value);
+                                        }
+                                        
+                                        _parsedMessage.parseRow(obisCode, value);
+                                    }
                                 }
                             }
                         }

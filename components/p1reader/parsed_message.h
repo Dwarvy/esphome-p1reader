@@ -68,15 +68,26 @@ namespace esphome
                 
                 int obisCodeLen = strnlen(obisCode, 16);  // Increased max length to handle longer OBIS codes
                 
-                // Gas measurement - typically 0.24.2.1.1.1, 0.24.3.0, or 0-1:24.2.1.1.1
-                if (strstr(obisCode, "24.2") != nullptr) {
+                // KAIFA meters often use these OBIS codes for gas and water
+                
+                // Gas measurement patterns
+                // Standard: 0.24.2.1.1.1, 0.24.3.0
+                // DSMR format: 0-1:24.2.1(.1.1)
+                if (strstr(obisCode, "24.2") != nullptr || 
+                    strstr(obisCode, "0-1:24.2.1") != nullptr ||
+                    strstr(obisCode, "0-1:24.3.0") != nullptr) {
                     gasConsumption = obisValue;
                     ESP_LOGI("obis", "Gas consumption: %f", gasConsumption);
                     return;
                 }
                 
-                // Water measurement - typically 0-1:24.4.0 or similar
-                if (strstr(obisCode, "24.4") != nullptr) {
+                // Water measurement patterns
+                // Standard: 0-1:24.4.0
+                // KAIFA often uses: 0-n:24.4.0 where n can be 2,3,4
+                if (strstr(obisCode, "24.4") != nullptr ||
+                    strstr(obisCode, "0-2:24") != nullptr ||
+                    strstr(obisCode, "0-3:24") != nullptr ||
+                    strstr(obisCode, "0-4:24") != nullptr) {
                     waterConsumption = obisValue;
                     ESP_LOGI("obis", "Water consumption: %f", waterConsumption);
                     return;
