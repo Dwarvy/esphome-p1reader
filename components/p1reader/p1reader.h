@@ -125,6 +125,7 @@ namespace esphome
             void (P1Reader::*readP1Message)(){nullptr};
             void initiate_scan();
             void readP1MessageAscii();
+            void readP1MessageHDLC();
             
             void processByte(char b);
             void processLine(char* buffer);
