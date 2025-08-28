@@ -103,94 +103,78 @@ namespace esphome
                                 cumulative_active_import->publish_state(parsedMessage->totalCumulativeActiveImport);
                             break;
                         case 2:
+                            if (cumulative_active_import_t1 != nullptr)
+                                cumulative_active_import_t1->publish_state(parsedMessage->cumulativeActiveImportT1);
+                            break;
+                        case 3:
+                            if (cumulative_active_import_t2 != nullptr)
+                                cumulative_active_import_t2->publish_state(parsedMessage->cumulativeActiveImportT2);
+                            break;
+                        case 4:
                             if (cumulative_active_export != nullptr)
                                 cumulative_active_export->publish_state(parsedMessage->cumulativeActiveExport);
                             break;
-                        case 3:
+                        case 5:
                             if (momentary_active_import != nullptr)
                                 momentary_active_import->publish_state(parsedMessage->momentaryActiveImport);
                             break;
-                        case 4:
+                        case 6:
                             if (momentary_active_export != nullptr)
                                 momentary_active_export->publish_state(parsedMessage->momentaryActiveExport);
                             break;
-                        case 5:
+                        case 7:
                             if (momentary_active_import_l1 != nullptr)
                                 momentary_active_import_l1->publish_state(parsedMessage->momentaryActiveImportL1);
                             break;
-                        case 6:
+                        case 8:
                             if (momentary_active_export_l1 != nullptr)
                                 momentary_active_export_l1->publish_state(parsedMessage->momentaryActiveExportL1);
                             break;
-                        case 7:
+                        case 9:
                             if (momentary_active_import_l2 != nullptr)
                                 momentary_active_import_l2->publish_state(parsedMessage->momentaryActiveImportL2);
                             break;
-                        case 8:
+                        case 10:
                             if (momentary_active_export_l2 != nullptr)
                                 momentary_active_export_l2->publish_state(parsedMessage->momentaryActiveExportL2);
                             break;
-                        case 9:
+                        case 11:
                             if (momentary_active_import_l3 != nullptr)
                                 momentary_active_import_l3->publish_state(parsedMessage->momentaryActiveImportL3);
                             break;
-                        case 10:
+                        case 12:
                             if (momentary_active_export_l3 != nullptr)
                                 momentary_active_export_l3->publish_state(parsedMessage->momentaryActiveExportL3);
                             break;
-                        case 11:
-                            if (voltage_l1 != nullptr)
-                                voltage_l1->publish_state(parsedMessage->voltageL1);
-                            break;
-                        case 12:
-                            if (voltage_l2 != nullptr)
-                                voltage_l2->publish_state(parsedMessage->voltageL2);
-                            break;
                         case 13:
-                            if (voltage_l3 != nullptr)
-                                voltage_l3->publish_state(parsedMessage->voltageL3);
-                            break;
-                        case 14:
-                            if (current_l1 != nullptr)
-                                current_l1->publish_state(parsedMessage->currentL1);
-                            break;
-                        case 15:
-                            if (current_l2 != nullptr)
-                                current_l2->publish_state(parsedMessage->currentL2);
-                            break;
-                        case 16:
-                            if (current_l3 != nullptr)
-                                current_l3->publish_state(parsedMessage->currentL3);
-                            break;
-                        case 17:
                             if (cumulative_reactive_import != nullptr)
                                 cumulative_reactive_import->publish_state(parsedMessage->cumulativeReactiveImport);
                             break;
-                        case 18:
+                        case 14:
                             if (cumulative_reactive_export != nullptr)
                                 cumulative_reactive_export->publish_state(parsedMessage->cumulativeReactiveExport);
                             break;
-                        case 19:
+                        case 15:
                             if (momentary_reactive_import != nullptr)
                                 momentary_reactive_import->publish_state(parsedMessage->momentaryReactiveImport);
                             break;
-                        case 20:
+                        case 16:
                             if (momentary_reactive_export != nullptr)
                                 momentary_reactive_export->publish_state(parsedMessage->momentaryReactiveExport);
                             break;
-                        case 21:
+                        case 17:
                             if (momentary_reactive_import_l1 != nullptr)
                                 momentary_reactive_import_l1->publish_state(parsedMessage->momentaryReactiveImportL1);
                             break;
-                        case 22:
+                        case 18:
                             if (momentary_reactive_export_l1 != nullptr)
                                 momentary_reactive_export_l1->publish_state(parsedMessage->momentaryReactiveExportL1);
                             break;
-                        case 23:
+                        case 19:
                             if (momentary_reactive_import_l2 != nullptr)
                                 momentary_reactive_import_l2->publish_state(parsedMessage->momentaryReactiveImportL2);
                             break;
-                        case 24:
+                        case 20:
                             if (momentary_reactive_export_l2 != nullptr)
                                 momentary_reactive_export_l2->publish_state(parsedMessage->momentaryReactiveExportL2);
                             break;
@@ -218,14 +202,7 @@ namespace esphome
                             if (cumulative_active_export_t2 != nullptr)
                                 cumulative_active_export_t2->publish_state(parsedMessage->cumulativeActiveExportT2);
                             break;
-                        case 31:
-                            if (cumulative_active_import_t1 != nullptr)
-                                cumulative_active_import_t1->publish_state(parsedMessage->cumulativeActiveImportT1);
-                            break;
-                        case 32:
-                            if (cumulative_active_import_t2 != nullptr)
-                                cumulative_active_import_t2->publish_state(parsedMessage->cumulativeActiveImportT2);
-                            break;
+                        // Cases 31 and 32 removed - T1 and T2 import values now published earlier as cases 2 and 3
                         default:
                             ESP_LOGW("publish", "Unknown sensor to publish %d", parsedMessage->sensorsToSend + 1);
                             break;
