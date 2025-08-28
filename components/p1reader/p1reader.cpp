@@ -210,7 +210,7 @@ namespace esphome
 
                     if ((millis() - start) > 50)
                     {
-                        ESP_LOGW("publish", "Publishing sensors is taking too long (%ld), will continue in next scheduler run (remain: %d)", 
+                        ESP_LOGW("publish", "Publishing sensors is taking too long (%u), will continue in next scheduler run (remain: %d)", 
                           millis() - start, parsedMessage->sensorsToSend);
                         break;
                     }
