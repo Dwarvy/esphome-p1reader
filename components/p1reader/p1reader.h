@@ -123,8 +123,15 @@ namespace esphome
 
             // Message read abstraction
             void (P1Reader::*readP1Message)(){nullptr};
+            void initiate_scan();
             void readP1MessageAscii();
-            void readP1MessageHDLC();
+            
+            void processByte(char b);
+            void processLine(char* buffer);
+
+            // Accessor methods for template sensors
+            float get_day_import_t1_value() const { return _parsedMessage.cumulativeActiveImportT1; }
+            float get_night_import_t2_value() const { return _parsedMessage.cumulativeActiveImportT2; }
 
         public:
             // Component attribute support

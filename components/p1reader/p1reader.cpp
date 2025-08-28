@@ -92,6 +92,10 @@ namespace esphome
         {
             if (parsedMessage->telegramComplete) // Temporarily bypassing CRC check to allow values to be published
             {
+                // Log the T1 and T2 values with distinct tags for easy identification in the web interface
+                ESP_LOGI("DAY_IMPORT_T1", "%.3f kWh", parsedMessage->cumulativeActiveImportT1);
+                ESP_LOGI("NIGHT_IMPORT_T2", "%.3f kWh", parsedMessage->cumulativeActiveImportT2);
+                
                 uint32_t start = millis();
     
                 while (parsedMessage->sensorsToSend > 0)
@@ -222,6 +226,10 @@ namespace esphome
             else if (!parsedMessage->crcOk && parsedMessage->telegramComplete)
             {
                 parsedMessage->initNewTelegram();
+            }
+            if (parsedMessage->crcOk && parsedMessage->telegramComplete)
+            {
+                ESP_LOGI("publish", "Publishing sensors (crc ok)...");
             }
         }
     
