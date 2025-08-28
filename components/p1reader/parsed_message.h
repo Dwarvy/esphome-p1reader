@@ -278,7 +278,7 @@ namespace esphome
                 telegramComplete = false;
                 crcOk = false;
                 crc = 0;
-                sensorsToSend = 30; // Optimize to include only most important sensors
+                sensorsToSend = 33; // Include all important sensors including T1/T2 and other data
             }
             
             // Update CRC16 with a new byte
@@ -356,7 +356,7 @@ namespace esphome
                 waterConsumption = 0;
                 
                 crc = 0;
-                sensorsToSend = 30; // Initialize to include most important sensors
+                sensorsToSend = 33; // Initialize to include all important sensors including T1/T2 and other data
             }
         };
     } // namespace p1_reader
