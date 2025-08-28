@@ -178,6 +178,42 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_CURRENT,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        # DSMR specific tariff readings
+        cv.Optional("cumulative_active_import_t1"): sensor.sensor_schema(
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            accuracy_decimals=3,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
+        cv.Optional("cumulative_active_import_t2"): sensor.sensor_schema(
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            accuracy_decimals=3,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
+        cv.Optional("cumulative_active_export_t1"): sensor.sensor_schema(
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            accuracy_decimals=3,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
+        cv.Optional("cumulative_active_export_t2"): sensor.sensor_schema(
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            accuracy_decimals=3,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
+        # Gas and water consumption
+        cv.Optional("gas_consumption"): sensor.sensor_schema(
+            unit_of_measurement="m³",
+            accuracy_decimals=3,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
+        cv.Optional("water_consumption"): sensor.sensor_schema(
+            unit_of_measurement="m³",
+            accuracy_decimals=3,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 

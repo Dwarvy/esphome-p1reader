@@ -67,7 +67,9 @@ sensor:
   - platform: p1reader
     p1reader_id: p1reader_esp
     cumulative_active_import:
-      name: "Cumulative Active Import"
+      name: "Total Cumulative Active Import (T1+T2)"
+      unit_of_measurement: "kWh"
+      accuracy_decimals: 3
 
   - platform: p1reader
     p1reader_id: p1reader_esp

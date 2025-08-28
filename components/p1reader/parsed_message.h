@@ -23,9 +23,9 @@ namespace esphome
             bool crcOk;
             int sensorsToSend;
 
-            // Standard power readings
-            double cumulativeActiveImport;
-            double cumulativeActiveExport;
+            // Standard power readings - totals calculated from T1+T2
+            double totalCumulativeActiveImport;  // Total of T1+T2 imports
+            double cumulativeActiveExport;       // Total of T1+T2 exports
 
             double cumulativeReactiveImport;
             double cumulativeReactiveExport;
@@ -118,18 +118,18 @@ namespace esphome
                 if (strstr(obisCode, "1.8.1") != nullptr || strstr(obisCode, "1-0:1.8.1") != nullptr) {
                     cumulativeActiveImportT1 = obisValue;
                     ESP_LOGI("obis", "T1 Import: %f kWh", cumulativeActiveImportT1);
-                    // Set the generic cumulative value to sum of tariffs
-                    cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
-                    ESP_LOGI("obis", "Total Import updated: %f kWh", cumulativeActiveImport);
+                    
+                    totalCumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                    ESP_LOGI("obis", "Total Import updated: %f kWh", totalCumulativeActiveImport);
                     return;
                 }
                 
                 if (strstr(obisCode, "1.8.2") != nullptr || strstr(obisCode, "1-0:1.8.2") != nullptr) {
                     cumulativeActiveImportT2 = obisValue;
                     ESP_LOGI("obis", "T2 Import: %f kWh", cumulativeActiveImportT2);
-                    // Set the generic cumulative value to sum of tariffs
-                    cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
-                    ESP_LOGI("obis", "Total Import updated: %f kWh", cumulativeActiveImport);
+                    
+                    totalCumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                    ESP_LOGI("obis", "Total Import updated: %f kWh", totalCumulativeActiveImport);
                     return;
                 }
                 
@@ -186,7 +186,7 @@ namespace esphome
                                 switch (obisCode[4])
                                 {
                                     case '0': 
-                                        cumulativeActiveImport = obisValue;
+                                        totalCumulativeActiveImport = obisValue;
                                         break;
                                     // Specific tariff readings are handled above
                                     default: break;
@@ -301,13 +301,13 @@ namespace esphome
             // Update cumulative totals from tariffs
             void updateCumulativeTotals() {
                 // Calculate total cumulative import from T1 + T2
-                cumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
+                totalCumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
                 
                 // Calculate total cumulative export from T1 + T2
                 cumulativeActiveExport = cumulativeActiveExportT1 + cumulativeActiveExportT2;
                 
-                ESP_LOGI("totals", "Updated cumulative totals - Import: %f kWh, Export: %f kWh", 
-                         cumulativeActiveImport, cumulativeActiveExport);
+                ESP_LOGI("totals", "Updated cumulative totals - Import: %f kWh (T1: %f, T2: %f), Export: %f kWh", 
+                         totalCumulativeActiveImport, cumulativeActiveImportT1, cumulativeActiveImportT2, cumulativeActiveExport);
             }
             
             // Constructor
@@ -318,7 +318,7 @@ namespace esphome
                 sensorsToSend = 32;
                 
                 // Initialize all values to 0
-                cumulativeActiveImport = 0;
+                totalCumulativeActiveImport = 0;
                 cumulativeActiveExport = 0;
                 cumulativeReactiveImport = 0;
                 cumulativeReactiveExport = 0;

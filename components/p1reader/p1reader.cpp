@@ -100,7 +100,7 @@ namespace esphome
                     {
                         case 1:
                             if (cumulative_active_import != nullptr)
-                                cumulative_active_import->publish_state(parsedMessage->cumulativeActiveImport);
+                                cumulative_active_import->publish_state(parsedMessage->totalCumulativeActiveImport);
                             break;
                         case 2:
                             if (cumulative_active_export != nullptr)
@@ -203,12 +203,12 @@ namespace esphome
                                 momentary_reactive_export_l3->publish_state(parsedMessage->momentaryReactiveExportL3);
                             break;
                         case 27:
-                            if (cumulative_active_import_t1 != nullptr)
-                                cumulative_active_import_t1->publish_state(parsedMessage->cumulativeActiveImportT1);
+                            if (gas_consumption != nullptr)
+                                gas_consumption->publish_state(parsedMessage->gasConsumption);
                             break;
                         case 28:
-                            if (cumulative_active_import_t2 != nullptr)
-                                cumulative_active_import_t2->publish_state(parsedMessage->cumulativeActiveImportT2);
+                            if (water_consumption != nullptr)
+                                water_consumption->publish_state(parsedMessage->waterConsumption);
                             break;
                         case 29:
                             if (cumulative_active_export_t1 != nullptr)
@@ -219,21 +219,23 @@ namespace esphome
                                 cumulative_active_export_t2->publish_state(parsedMessage->cumulativeActiveExportT2);
                             break;
                         case 31:
-                            if (gas_consumption != nullptr)
-                                gas_consumption->publish_state(parsedMessage->gasConsumption);
+                            if (cumulative_active_import_t1 != nullptr)
+                                cumulative_active_import_t1->publish_state(parsedMessage->cumulativeActiveImportT1);
                             break;
                         case 32:
-                            if (water_consumption != nullptr)
-                                water_consumption->publish_state(parsedMessage->waterConsumption);
+                            if (cumulative_active_import_t2 != nullptr)
+                                cumulative_active_import_t2->publish_state(parsedMessage->cumulativeActiveImportT2);
                             break;
                         default:
-                            // Unused
+                            ESP_LOGW("publish", "Unknown sensor to publish %d", parsedMessage->sensorsToSend + 1);
                             break;
                     }
 
-                    if ((millis() - start) > 20)
+                    if ((millis() - start) > 50)
                     {
-                        return; // Wait for next execution slice
+                        ESP_LOGW("publish", "Publishing sensors is taking too long (%ld), will continue in next scheduler run (remain: %d)", 
+                          millis() - start, parsedMessage->sensorsToSend);
+                        break;
                     }
                 }
 
