@@ -240,19 +240,4 @@ sensor:
       unit_of_measurement: "m³"
       accuracy_decimals: 3
 
-  # Add explicit sensors for T1 and T2 to ensure they appear in the interface
-  - platform: template
-    name: "Day Import (T1)"
-    id: day_import_t1
-    unit_of_measurement: "kWh"
-    accuracy_decimals: 3
-    lambda: |-
-      return id(p1reader_esp).get_day_import_t1_value();
-      
-  - platform: template
-    name: "Night Import (T2)"
-    id: night_import_t2
-    unit_of_measurement: "kWh"
-    accuracy_decimals: 3
-    lambda: |-
-      return id(p1reader_esp).get_night_import_t2_value();
+  # No need for template sensors - native p1reader sensors are already defined
