@@ -96,6 +96,10 @@ namespace esphome
                 ESP_LOGI("DAY_IMPORT_T1", "%.3f kWh", parsedMessage->cumulativeActiveImportT1);
                 ESP_LOGI("NIGHT_IMPORT_T2", "%.3f kWh", parsedMessage->cumulativeActiveImportT2);
                 
+                // Log gas and water values with distinct tags
+                ESP_LOGI("GAS_CONSUMPTION", "%.3f m³", parsedMessage->gasConsumption);
+                ESP_LOGI("WATER_CONSUMPTION", "%.3f m³", parsedMessage->waterConsumption);
+                
                 uint32_t start = millis();
     
                 while (parsedMessage->sensorsToSend > 0)

@@ -152,16 +152,20 @@ namespace esphome
                 }
                 
                 // Gas measurement patterns - Support all common DSMR formats
+                // Standard DSMR 4/5 gas meter reading format: 0-1:24.2.1 (channel 0, OBIS 24.2.1 = Gas meter)
                 if (strstr(obisCode, "24.2.1") != nullptr || strstr(obisCode, "24.3.0") != nullptr ||
-                    strstr(obisCode, "0-1:24.2.1") != nullptr || strstr(obisCode, "0-2:24.2.1") != nullptr) {
+                    strstr(obisCode, "0-1:24.2.1") != nullptr || strstr(obisCode, "0-1:24.3.0") != nullptr ||
+                    strstr(obisCode, "0-2:24.2.1") != nullptr || strstr(obisCode, "0-2:24.3.0") != nullptr) {
                     gasConsumption = obisValue;
                     ESP_LOGI("obis", "Gas consumption: %f m³ (Code: %s)", gasConsumption, obisCode);
                     return;
                 }
                 
                 // Water measurement patterns (if available)
+                // Standard DSMR water meter: 0-n:24.2.1 where n=3,4,etc for water channels
                 if (strstr(obisCode, "1-0:8.0") != nullptr || strstr(obisCode, "8.0") != nullptr ||
-                    strstr(obisCode, "0-1:24.2.1.8") != nullptr || strstr(obisCode, "0-3:24.2.1") != nullptr) {
+                    strstr(obisCode, "0-1:24.2.1.8") != nullptr || strstr(obisCode, "0-3:24.2.1") != nullptr ||
+                    strstr(obisCode, "0-4:24.2.1") != nullptr) {
                     waterConsumption = obisValue;
                     ESP_LOGI("obis", "Water consumption: %f m³ (Code: %s)", waterConsumption, obisCode);
                     return;
