@@ -115,18 +115,18 @@ namespace esphome
                 }
                 
                 // DSMR / KAIFA specific tariff readings (T1/T2)
-                if (strstr(obisCode, "1.8.1") != nullptr || strstr(obisCode, "1-0:1.8.1") != nullptr) {
-                    cumulativeActiveImportT1 = obisValue;
-                    ESP_LOGI("obis", "T1 Import: %f kWh", cumulativeActiveImportT1);
+                if (strstr(obisCode, "1.8.2") != nullptr || strstr(obisCode, "1-0:1.8.2") != nullptr) {
+                    cumulativeActiveImportT1 = obisValue; // Now T1 = 1.8.2 (Day tariff)
+                    ESP_LOGI("obis", "T1 Day Import: %f kWh", cumulativeActiveImportT1);
                     
                     totalCumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
                     ESP_LOGI("obis", "Total Import updated: %f kWh", totalCumulativeActiveImport);
                     return;
                 }
                 
-                if (strstr(obisCode, "1.8.2") != nullptr || strstr(obisCode, "1-0:1.8.2") != nullptr) {
-                    cumulativeActiveImportT2 = obisValue;
-                    ESP_LOGI("obis", "T2 Import: %f kWh", cumulativeActiveImportT2);
+                if (strstr(obisCode, "1.8.1") != nullptr || strstr(obisCode, "1-0:1.8.1") != nullptr) {
+                    cumulativeActiveImportT2 = obisValue; // Now T2 = 1.8.1 (Night tariff)
+                    ESP_LOGI("obis", "T2 Night Import: %f kWh", cumulativeActiveImportT2);
                     
                     totalCumulativeActiveImport = cumulativeActiveImportT1 + cumulativeActiveImportT2;
                     ESP_LOGI("obis", "Total Import updated: %f kWh", totalCumulativeActiveImport);
@@ -151,17 +151,19 @@ namespace esphome
                     return;
                 }
                 
-                // Gas measurement patterns - DSMR format used by KAIFA
-                if (strstr(obisCode, "24.2.1") != nullptr || strstr(obisCode, "24.3.0") != nullptr) {
+                // Gas measurement patterns - Support all common DSMR formats
+                if (strstr(obisCode, "24.2.1") != nullptr || strstr(obisCode, "24.3.0") != nullptr ||
+                    strstr(obisCode, "0-1:24.2.1") != nullptr || strstr(obisCode, "0-2:24.2.1") != nullptr) {
                     gasConsumption = obisValue;
-                    ESP_LOGI("obis", "Gas consumption: %f m³", gasConsumption);
+                    ESP_LOGI("obis", "Gas consumption: %f m³ (Code: %s)", gasConsumption, obisCode);
                     return;
                 }
                 
                 // Water measurement patterns (if available)
-                if (strstr(obisCode, "1-0:8.0") != nullptr || strstr(obisCode, "8.0") != nullptr) {
+                if (strstr(obisCode, "1-0:8.0") != nullptr || strstr(obisCode, "8.0") != nullptr ||
+                    strstr(obisCode, "0-1:24.2.1.8") != nullptr || strstr(obisCode, "0-3:24.2.1") != nullptr) {
                     waterConsumption = obisValue;
-                    ESP_LOGI("obis", "Water consumption: %f m³", waterConsumption);
+                    ESP_LOGI("obis", "Water consumption: %f m³ (Code: %s)", waterConsumption, obisCode);
                     return;
                 }
                 
