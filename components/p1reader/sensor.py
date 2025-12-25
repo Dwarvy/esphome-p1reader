@@ -5,6 +5,7 @@ from esphome.const import (
     CONF_ID,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_GAS,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_REACTIVE_POWER,
     DEVICE_CLASS_VOLTAGE,
@@ -207,6 +208,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional("gas_consumption"): sensor.sensor_schema(
             unit_of_measurement="m³",
             accuracy_decimals=3,
+            device_class=DEVICE_CLASS_GAS,
             state_class=STATE_CLASS_TOTAL_INCREASING,
         ),
         cv.Optional("water_consumption"): sensor.sensor_schema(
