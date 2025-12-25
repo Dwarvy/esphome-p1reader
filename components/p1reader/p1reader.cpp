@@ -300,6 +300,10 @@ namespace esphome
         
         void P1Reader::processTelegram(const char* telegram)
         {
+            // Log the full telegram for troubleshooting
+            ESP_LOGI("telegram", "=== Full P1 Telegram ===\n%s", telegram);
+            ESP_LOGI("telegram", "=== End Telegram ===");
+            
             // Reset CRC and message parsing state
             _parsedMessage.initNewTelegram();
             
@@ -379,6 +383,7 @@ namespace esphome
                                 // Log all OBIS codes for diagnostic purposes
                                 ESP_LOGD("obis_raw", "Found OBIS code: %s with ID: %s", obisCode, dataId);
                                 
+                                // Handle electricity data (1-0:x.x.x)
                                 if (strncmp(DATA_ID, dataId, strlen(DATA_ID)) == 0) {
                                     char* value = strtok(NULL, DELIMITERS);
                                     char* unit = strtok(NULL, DELIMITERS);
@@ -392,6 +397,25 @@ namespace esphome
                                         }
                                         
                                         _parsedMessage.parseRow(obisCode, value);
+                                    }
+                                }
+                                // Handle gas/water meter data (0-1:24.2.x, 0-2:24.2.x, etc.)
+                                // Format: 0-1:24.2.1(timestamp)(value*unit)
+                                // After strtok: dataId="0-1", obisCode="24.2.1"
+                                // Next tokens: timestamp, then value, then unit
+                                else if (strncmp("0-", dataId, 2) == 0 && strstr(obisCode, "24.2") != nullptr) {
+                                    char* timestamp = strtok(NULL, DELIMITERS);  // Skip timestamp
+                                    char* value = strtok(NULL, DELIMITERS);      // Actual gas value
+                                    char* unit = strtok(NULL, DELIMITERS);       // Unit (m3)
+                                    
+                                    if (value) {
+                                        // Reconstruct the full OBIS code for parseRow
+                                        char fullObisCode[32];
+                                        snprintf(fullObisCode, sizeof(fullObisCode), "%s:%s", dataId, obisCode);
+                                        
+                                        ESP_LOGI("obis_gas", "Gas meter %s = %s %s (timestamp: %s)", 
+                                                 fullObisCode, value, unit ? unit : "", timestamp ? timestamp : "");
+                                        _parsedMessage.parseRow(fullObisCode, value);
                                     }
                                 }
                             }
